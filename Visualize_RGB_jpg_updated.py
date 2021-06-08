@@ -191,24 +191,34 @@ class GUI(object):
             if self.stereo:
             #     resized_imgLeft = cv2.resize(imgLeft[max(0,self.left_image_updown):min(self.imgSize[0],self.imgSize[0]+self.left_image_updown), :, :], (imgLeft.shape[0], imgLeft.shape[1]))
             #     resized_imgRight = cv2.resize(imgRight[max(0,self.right_image_updown):min(self.imgSize[0],self.imgSize[0]+self.right_image_updown), :, :], (imgRight.shape[0], imgRight.shape[1]))
+
+                # Crop image in the up/down direction, and re-size back to a 1:1 resolution (why fx is also scaled by the same factor?)
                 resized_imgLeft = cv2.resize(imgLeft[max(0,self.left_image_updown):min(self.imgSize[0],self.imgSize[0]+self.left_image_updown), :, :], (0, 0), \
                                                 fx=self.imgSize[0]/(self.imgSize[0]-np.abs(self.left_image_updown)), fy=self.imgSize[0]/(self.imgSize[0]-np.abs(self.left_image_updown)))
 
                 resized_imgRight = cv2.resize(imgRight[max(0,self.right_image_updown):min(self.imgSize[0],self.imgSize[0]+self.right_image_updown), :, :], (0, 0), \
                                                 fx=self.imgSize[0]/(self.imgSize[0]-np.abs(self.right_image_updown)), fy=self.imgSize[0]/(self.imgSize[0]-np.abs(self.right_image_updown)))
 
+                # Get the stereo image frames truncated from the resized images 
+                # self.imgSize is the original single frame image from redis
                 resized_imgLeft = resized_imgLeft[:,int((np.abs(resized_imgLeft.shape[1]-self.imgSize[1]))/2):int((self.imgSize[1]+np.abs(resized_imgLeft.shape[1]-self.imgSize[1])/2)),:]
-                
+
                 resized_imgRight = resized_imgRight[:,int((np.abs(resized_imgRight.shape[1]-self.imgSize[1]))/2):int((self.imgSize[1]+np.abs(resized_imgRight.shape[1]-self.imgSize[1])/2)):,:]
 
+                # Concatenate the left and right images horizontally to form the stereo image with horizontal overlap. Problem if the self.overlap cuts off too much  
                 stackedImg = np.hstack((resized_imgLeft[:, :-(self.overlap + 1), :], resized_imgRight[:, self.overlap:, :]))
                 # stackedImg = np.hstack((imgLeft[:, :-(self.overlap + 1), :], imgRight[:, self.overlap:, :]))
+
+                # New method to not produce black bars
+                # Get the indices from the 
+
             else:
                 stackedImg = imgLeft
                 stackedImg = imgRight
 
             displayImg = np.zeros((self.screenHeight, self.screenWidth, self.imgSize[2]), np.uint8)
 
+            # Re-size to recover the displayImg resolution 
             if float(self.screenHeight)/self.screenWidth > float(stackedImg.shape[0])/stackedImg.shape[1]:
                 stackedImg = cv2.resize(stackedImg, (0, 0), fx=self.screenWidth/float(stackedImg.shape[1]), fy=self.screenWidth/float(stackedImg.shape[1]))
                 offset = int((self.screenHeight - stackedImg.shape[0])/2)
