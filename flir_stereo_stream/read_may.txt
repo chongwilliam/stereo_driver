@@ -1,0 +1,33 @@
+
+follow spinnaker installation guide in spinnaker README
+don't forget to modify the USB-FS memory to 1000MB
+
+sudo apt install cmake redis-server libhiredis-dev git libeigen3-dev net-tools arp-scan
+sudo apt install libopencv-dev
+sudo apt install python3-opencv
+
+sudo apt install python3-pip
+sudo apt-get install python3.6-tk
+pip3 install redis
+
+
+
+
+--------------------------
+Chest Cam Model:
+--------------------------
+
+DeviceID : 14468721
+DeviceSerialNumber : 14468721
+DeviceVendorName : Point Grey Research
+DeviceModelName : Blackfly BFLY-PGE-13E4C
+
+see camera ip: sudo arp-scan -l --interface=enp1s0
+
+CEnumEntryPtr ptrPixelFormatRGB8 = ptrPixelFormat->GetEntryByName("BayerBG8");
+
+ImagePtr convertedImage = pResultImage->Convert(PixelFormat_BGR8, HQ_LINEAR);
+
+cv::Mat cv_img = cv::Mat(col_size + yPadding, row_size + xPadding, CV_8UC3, convertedImage->GetData(), convertedImage->GetStride() ); 
+
+
