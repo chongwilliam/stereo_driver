@@ -69,7 +69,8 @@ int ConvertToCVmat(ImagePtr pImage);
 void recordJpgRedis(const std::string& dir);
 const std::string capture_key = "stereo::capture::trigger";  // 1 for capture, 0 default 
 const std::string reset_capture_key = "stereo::capture::reset";  // 1 to reset (make new directory), 0 default
-
+ImagePtr right_image;
+ImagePtr left_image;
 
 #ifdef _DEBUG
 // Disables heartbeat on GEV cameras so debugging does not incur timeout errors
@@ -203,8 +204,9 @@ int AcquireImages(CameraList camList)
     // std::string rec_date_time = asctime(curtime);
     std::string dir = "/home/radiator2/stereo_images_recording/";
     std::string save_dir;
-    int r_img_cnt = 0; 
-    int l_img_cnt = 0; 
+    int img_cnt = 0;
+    // int r_img_cnt = 0; 
+    // int l_img_cnt = 0; 
     m_redis->setRedis(capture_key, 0);  // set to default value 
     m_redis->setRedis(reset_capture_key, 0);  // set to default value 
 
@@ -467,17 +469,18 @@ int AcquireImages(CameraList camList)
                           // cv::waitKey(1);
                           m_cv_img_left = cv_img.clone();
                           // std::cout << "store left" << std::endl;
-                      		// save image if requested 
-	                        if (m_redis->getRedisDouble(capture_key) == 1) 
-				            {
-			            		save_dir = dir + "Left/" + std::to_string(r_img_cnt) + ".png";
-			            		pResultImage->Save(save_dir.c_str());
-				                r_img_cnt += 1;
-				                if (r_img_cnt == l_img_cnt)
-				                {
-				                	m_redis->setRedis(capture_key, 0);
-				                }
-				            }
+                          left_image = pResultImage;
+                //       		// save image if requested 
+	               //          if (m_redis->getRedisDouble(capture_key) == 1) 
+				            // {
+			            	// 	save_dir = dir + "Left/" + std::to_string(r_img_cnt) + ".png";
+			            	// 	pResultImage->Save(save_dir.c_str());
+				            //     r_img_cnt += 1;
+				            //     if (r_img_cnt == l_img_cnt)
+				            //     {
+				            //     	m_redis->setRedis(capture_key, 0);
+				            //     }
+				            // }
                         }
                         else if (strcmp("17084522", strSerialNumbers[i]) == 0  )
                         {
@@ -486,16 +489,17 @@ int AcquireImages(CameraList camList)
                           // cv::waitKey(1);
                           m_cv_img_right = cv_img.clone();
                           // std::cout << "store right" << std::endl;
+                          right_image = pResultImage;
                     		// save image if requested 
-	                        if (m_redis->getRedisDouble(capture_key) == 1) 
-				            {
-			            		save_dir = dir + "Right/" + std::to_string(l_img_cnt) + ".png";
-			            		pResultImage->Save(save_dir.c_str());
-				                l_img_cnt += 1;
-				                if (r_img_cnt == l_img_cnt)
-				                {
-				                	m_redis->setRedis(capture_key, 0);
-				                }				            }
+	               //          if (m_redis->getRedisDouble(capture_key) == 1) 
+				            // {
+			            	// 	save_dir = dir + "Right/" + std::to_string(l_img_cnt) + ".png";
+			            	// 	pResultImage->Save(save_dir.c_str());
+				            //     l_img_cnt += 1;
+				            //     if (r_img_cnt == l_img_cnt)
+				            //     {
+				            //     	m_redis->setRedis(capture_key, 0);
+				            //     }				            }
                         }
                         // std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -553,6 +557,17 @@ int AcquireImages(CameraList camList)
               // std::cout << "after redis right" << std::endl;
               // m_mutex.unlock();
               // std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Makes app run longer but still crashes.
+
+      			// save image if requested 
+                if (m_redis->getRedisDouble(capture_key) == 1) 
+	            {
+            		save_dir = dir + "Right/" + std::to_string(img_cnt) + "_right" + ".png";
+            		right_image->Save(save_dir.c_str());
+            		save_dir = dir + "Left/" + std::to_string(img_cnt) + "_left" + ".png";
+            		left_image->Save(save_dir.c_str());
+            		img_cnt += 1;
+	    		    m_redis->setRedis(capture_key, 0);  // set to default value 
+            	}
 
             // // Query redis key to reset stereo image capture
             // if (m_redis->getRedisDouble(reset_capture_key) == 1) 
