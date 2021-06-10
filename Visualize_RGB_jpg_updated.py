@@ -24,8 +24,8 @@ class GUI(object):
         # self.right_image_updown = 0
         # self.left_image_leftright = 0
         # self.right_image_leftright = 0 
-        self.left_coord = [0, 0]  # current top left edge 
-        self.right_coord = [0, 0]  # current top left edge 
+        self.left_coord = [0, 0]  # current top left edge (row, col)
+        self.right_coord = [0, 0]  # current top left edge (row, col)
 
         # sub-sample image parameters
         self.sample_height = 0
