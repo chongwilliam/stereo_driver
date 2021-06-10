@@ -20,6 +20,7 @@ class GUI(object):
         self.overlap = 0
         self.fullscreen = False
         self.stereo = True
+        self.drawCross = False
         # self.left_image_updown = 0
         # self.right_image_updown = 0
         # self.left_image_leftright = 0
@@ -32,6 +33,7 @@ class GUI(object):
         self.sample_width = 0
         self.height_factor = 0.75 
         self.width_factor = 0.75
+        self.pixel_step = 5;
 
         hostIP = '192.168.1.103'
         # hostIP = 'localhost'
@@ -55,34 +57,34 @@ class GUI(object):
     def increaseOverlap(self):
         # self.overlap += 10
         # self.overlap = min(self.imgSize[1], self.overlap)
-        self.left_coord[1] += 1
-        self.right_coord[1] -= 1
+        self.left_coord[1] -= self.pixel_step
+        self.right_coord[1] += self.pixel_step
 
     def decreaseOverlap(self):
         # self.overlap -= 10
         # self.overlap = max(0, self.overlap)
-        self.left_coord[1] -= 1
-        self.right_coord[1] += 1
+        self.left_coord[1] += self.pixel_step
+        self.right_coord[1] -= self.pixel_step
 
     def moveLeftUp(self):
         # self.left_image_updown += 10
         # self.left_image_updown = min(self.imgSize[0], self.left_image_updown)
-        self.left_coord[0] -= 1
+        self.left_coord[0] -= self.pixel_step
 
     def moveLeftDown(self):
         # self.left_image_updown -= 10
         # self.left_image_updown = max(-self.imgSize[0], self.left_image_updown)
-        self.left_coord[0] += 1
+        self.left_coord[0] += self.pixel_step
 
     def moveRightUp(self):
         # self.right_image_updown += 10
         # self.right_image_updown = min(self.imgSize[0], self.right_image_updown)
-        self.right_coord[0] -= 1
+        self.right_coord[0] -= self.pixel_step
 
     def moveRightDown(self):
         # self.right_image_updown -= 10
         # self.right_image_updown = max(-self.imgSize[0], self.right_image_updown)
-        self.right_coord[0] += 1 
+        self.right_coord[0] += self.pixel_step 
 
     def setOverlap(self, value):
         self.overlap = min(self.imgSize[1], max(0, value))
@@ -99,15 +101,19 @@ class GUI(object):
 
     def saveOffsets(self, filename):
         offsets_log_file = open(filename, "w")
-        offsets_log_file.writelines([str(self.overlap)+"\n", str(self.left_image_updown)+"\n", str(self.right_image_updown)+"\n"])
+        offsets_log_file.writelines([str(self.left_coord[0])+"\n", str(self.left_coord[1])+"\n", str(self.right_coord[0])+"\n", str(self.right_coord[1])+"\n"])
         offsets_log_file.close()
 
     def loadOffsets(self,filename):
         offsets_log_file = open(filename, "r")
-        self.setOverlap(int(offsets_log_file.readline()))
-        self.setLeftUpdown((int(offsets_log_file.readline())))
-        self.setRightUpdown((int(offsets_log_file.readline())))
+        self.left_coord[0] = int(offsets_log_file.readline())
+        self.left_coord[1] = int(offsets_log_file.readline())
+        self.right_coord[0] = int(offsets_log_file.readline())
+        self.right_coord[1] = int(offsets_log_file.readline())
         offsets_log_file.close()
+
+    def toggleCrosshairs(self):
+        self.drawCross = not self.drawCross 
 
     def toggleFullscreen(self):
         self.fullscreen = not self.fullscreen
@@ -208,8 +214,13 @@ class GUI(object):
             # Initialize the right image, top-right coordinate
             self.sample_height = int(self.height_factor * self.imgSize[0])
             self.sample_width = int(self.width_factor * self.imgSize[1])  
-            if ctr == 0:  # initialize only at the start 
-                self.right_coord[1] = self.imgSize[1] - self.sample_width - 1  # top left corner of right image 
+            if ctr == 1:  # initialize only at the start 
+                self.right_coord[0] = int(self.imgSize[0]/2 - self.sample_height/2)
+                # self.right_coord[1] = self.imgSize[1] - self.sample_width - 1  # top left corner of right image 
+                self.right_coord[1] = int(self.imgSize[1]/2 - self.sample_width/2)
+                self.left_coord[0] = int(self.imgSize[0]/2 - self.sample_height/2)
+                # self.left_coord[1] = self.imgSize[1] - self.sample_width - 1  # top left corner of right image 
+                self.left_coord[1] = int(self.imgSize[1]/2 - self.sample_width/2)
 
             if self.stereo:
             # #     resized_imgLeft = cv2.resize(imgLeft[max(0,self.left_image_updown):min(self.imgSize[0],self.imgSize[0]+self.left_image_updown), :, :], (imgLeft.shape[0], imgLeft.shape[1]))
@@ -233,11 +244,19 @@ class GUI(object):
             #     # stackedImg = np.hstack((imgLeft[:, :-(self.overlap + 1), :], imgRight[:, self.overlap:, :]))
 
                 ### Windowing Method ###              
-                sampled_imgLeft = imgLeft[max(0, self.left_coord[0]) : min(self.left_coord[0] + self.sample_height, self.imgSize[0] - 1), \   
+                sampled_imgLeft = imgLeft[max(0, self.left_coord[0]) : min(self.left_coord[0] + self.sample_height, self.imgSize[0] - 1), \
                                         max(0, self.left_coord[1]) : min(self.left_coord[1] + self.sample_width, self.imgSize[1] - 1), :]
                 
                 sampled_imgRight = imgRight[max(0, self.right_coord[0]) : min(self.right_coord[0] + self.sample_height, self.imgSize[0] - 1), \
                                         max(0, self.right_coord[1]) : min(self.right_coord[1] + self.sample_width, self.imgSize[1] - 1), :]
+
+                #crosshairs
+                if(self.drawCross == True):
+                    cv2.drawMarker(sampled_imgLeft, (int(sampled_imgLeft.shape[1]/2), int(sampled_imgLeft.shape[0]/2)),  (0, 0, 255), cv2.MARKER_CROSS, 100, 2);
+                    cv2.drawMarker(sampled_imgRight, (int(sampled_imgRight.shape[1]/2), int(sampled_imgRight.shape[0]/2)),  (0, 0, 255), cv2.MARKER_CROSS, 100, 2);
+
+                sampled_imgLeft = cv2.resize(sampled_imgLeft, (self.imgSize[1], self.imgSize[0]))
+                sampled_imgRight = cv2.resize(sampled_imgRight, (self.imgSize[1], self.imgSize[0]))
 
                 stackedImg = np.hstack((sampled_imgLeft, sampled_imgRight))
 
@@ -298,22 +317,22 @@ class GUI(object):
             key = cv2.waitKey(1)
             if key == 63234 or (key & 0xFF == ord('a')): # left arrow or 'a'
                 self.increaseOverlap()
-                self.saveOffsets(self.backupOffsetsFilename)
+                # self.saveOffsets(self.backupOffsetsFilename)
             if key == 63235 or (key & 0xFF == ord('d')): # right arrow or 'd'
                 self.decreaseOverlap()
-                self.saveOffsets(self.backupOffsetsFilename)
+                # self.saveOffsets(self.backupOffsetsFilename)
             if key & 0xFF == ord('y'):
                 self.moveLeftUp()
-                self.saveOffsets(self.backupOffsetsFilename)
+                # self.saveOffsets(self.backupOffsetsFilename)
             if key & 0xFF == ord('h'):
                 self.moveLeftDown()
-                self.saveOffsets(self.backupOffsetsFilename)
+                # self.saveOffsets(self.backupOffsetsFilename)
             if key & 0xFF == ord('i'):
                 self.moveRightUp()
-                self.saveOffsets(self.backupOffsetsFilename)
+                # self.saveOffsets(self.backupOffsetsFilename)
             if key & 0xFF == ord('k'):
                 self.moveRightDown()
-                self.saveOffsets(self.backupOffsetsFilename)
+                # self.saveOffsets(self.backupOffsetsFilename)
             if key & 0xFF == ord('f'):
                 self.toggleFullscreen()
             if key & 0xFF == ord('s'):
@@ -327,6 +346,8 @@ class GUI(object):
                 self.saveOffsets(self.savedOffsetsFilename)
             if key & 0xFF == ord('o'):
                 self.loadOffsets(self.savedOffsetsFilename)
+            if key & 0xFF == ord('c'):
+                self.toggleCrosshairs()
             if key & 0xFF == ord('q') or key == 27: # 27 = esc
                 break
             print("--- %s seconds show ---" % (time.time() - start_time_show))
