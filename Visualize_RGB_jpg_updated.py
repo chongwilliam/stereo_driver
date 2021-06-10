@@ -25,13 +25,13 @@ class GUI(object):
         # self.left_image_leftright = 0
         # self.right_image_leftright = 0 
         self.left_coord = [0, 0]  # current top left edge 
-        self.right_coord = [0, 0]  # current top right edge (needs the image width added)
+        self.right_coord = [0, 0]  # current top left edge 
 
         # sub-sample image parameters
         self.sample_height = 0
         self.sample_width = 0
-        self.width_factor = 0.75
         self.height_factor = 0.75 
+        self.width_factor = 0.75
 
         hostIP = '192.168.1.103'
         # hostIP = 'localhost'
@@ -206,9 +206,9 @@ class GUI(object):
             # cv2.addWeighted(overlayLeft, alpha, imgLeft, 1, 0, imgLeft)
 
             # Initialize the right image, top-right coordinate
-            self.right_coord[1] = self.imgSize[1]
             self.sample_height = int(self.height_factor * self.imgSize[0])
             self.sample_width = int(self.width_factor * self.imgSize[1])  
+            self.right_coord[1] = self.imgSize[1] - self.sample_width - 1  # top left corner of right image 
 
             if self.stereo:
             # #     resized_imgLeft = cv2.resize(imgLeft[max(0,self.left_image_updown):min(self.imgSize[0],self.imgSize[0]+self.left_image_updown), :, :], (imgLeft.shape[0], imgLeft.shape[1]))
@@ -232,11 +232,11 @@ class GUI(object):
             #     # stackedImg = np.hstack((imgLeft[:, :-(self.overlap + 1), :], imgRight[:, self.overlap:, :]))
 
                 ### Windowing Method ###              
-                sampled_imgLeft = imgLeft[max(0, self.left_coord[0]) : min(self.left_coord[0] + self.height, self.imgSize[0]), \   
-                                        max(0, self.left_coord[1]) : min(self.left_coord[1] + self.width, self.imgSize[1]), :]
+                sampled_imgLeft = imgLeft[max(0, self.left_coord[0]) : min(self.left_coord[0] + self.sample_height, self.imgSize[0] - 1), \   
+                                        max(0, self.left_coord[1]) : min(self.left_coord[1] + self.sample_width, self.imgSize[1] - 1), :]
                 
-                sampled_imgRight = imgRight[max(0, self.right_coord[0]) : min(self.right_coord[0] + self.height, self.imgSize[0]), \
-                                        max(0, self.right_coord[1] - self.width) : min(self.right_coord[1], self.imgSize[1]), :]
+                sampled_imgRight = imgRight[max(0, self.right_coord[0]) : min(self.right_coord[0] + self.sample_height, self.imgSize[0] - 1), \
+                                        max(0, self.right_coord[1]) : min(self.right_coord[1] + self.sample_width, self.imgSize[1] - 1), :]
 
                 stackedImg = np.hstack((sampled_imgLeft, sampled_imgRight))
 
