@@ -20,8 +20,18 @@ class GUI(object):
         self.overlap = 0
         self.fullscreen = False
         self.stereo = True
-        self.left_image_updown = 0
-        self.right_image_updown = 0
+        # self.left_image_updown = 0
+        # self.right_image_updown = 0
+        # self.left_image_leftright = 0
+        # self.right_image_leftright = 0 
+        self.left_coord = [0, 0]  # current top left edge 
+        self.right_coord = [0, 0]  # current top right edge (needs the image width added)
+
+        # sub-sample image parameters
+        self.sample_height = 0
+        self.sample_width = 0
+        self.width_factor = 0.75
+        self.height_factor = 0.75 
 
         hostIP = '192.168.1.103'
         # hostIP = 'localhost'
@@ -43,28 +53,36 @@ class GUI(object):
         self.screenHeight = self.root.winfo_screenheight()
 
     def increaseOverlap(self):
-        self.overlap += 10
-        self.overlap = min(self.imgSize[1], self.overlap)
+        # self.overlap += 10
+        # self.overlap = min(self.imgSize[1], self.overlap)
+        self.left_coord[1] += 1
+        self.right_coord[1] -= 1
 
     def decreaseOverlap(self):
-        self.overlap -= 10
-        self.overlap = max(0, self.overlap)
+        # self.overlap -= 10
+        # self.overlap = max(0, self.overlap)
+        self.left_coord[1] -= 1
+        self.right_coord[1] += 1
 
     def moveLeftUp(self):
-        self.left_image_updown += 10
-        self.left_image_updown = min(self.imgSize[0], self.left_image_updown)
+        # self.left_image_updown += 10
+        # self.left_image_updown = min(self.imgSize[0], self.left_image_updown)
+        self.left_coord[0] -= 1
 
     def moveLeftDown(self):
-        self.left_image_updown -= 10
-        self.left_image_updown = max(-self.imgSize[0], self.left_image_updown)
+        # self.left_image_updown -= 10
+        # self.left_image_updown = max(-self.imgSize[0], self.left_image_updown)
+        self.left_coord[0] += 1
 
     def moveRightUp(self):
-        self.right_image_updown += 10
-        self.right_image_updown = min(self.imgSize[0], self.right_image_updown)
+        # self.right_image_updown += 10
+        # self.right_image_updown = min(self.imgSize[0], self.right_image_updown)
+        self.right_coord[0] -= 1
 
     def moveRightDown(self):
-        self.right_image_updown -= 10
-        self.right_image_updown = max(-self.imgSize[0], self.right_image_updown)
+        # self.right_image_updown -= 10
+        # self.right_image_updown = max(-self.imgSize[0], self.right_image_updown)
+        self.right_coord[0] += 1 
 
     def setOverlap(self, value):
         self.overlap = min(self.imgSize[1], max(0, value))
@@ -187,30 +205,40 @@ class GUI(object):
             # overlayLeft[:, offset:, :] = overlayRight[:, :-offset, :]
             # cv2.addWeighted(overlayLeft, alpha, imgLeft, 1, 0, imgLeft)
 
+            # Initialize the right image, top-right coordinate
+            self.right_coord[1] = self.imgSize[1]
+            self.sample_height = int(self.height_factor * self.imgSize[0])
+            self.sample_width = int(self.width_factor * self.imgSize[1])  
 
             if self.stereo:
-            #     resized_imgLeft = cv2.resize(imgLeft[max(0,self.left_image_updown):min(self.imgSize[0],self.imgSize[0]+self.left_image_updown), :, :], (imgLeft.shape[0], imgLeft.shape[1]))
-            #     resized_imgRight = cv2.resize(imgRight[max(0,self.right_image_updown):min(self.imgSize[0],self.imgSize[0]+self.right_image_updown), :, :], (imgRight.shape[0], imgRight.shape[1]))
+            # #     resized_imgLeft = cv2.resize(imgLeft[max(0,self.left_image_updown):min(self.imgSize[0],self.imgSize[0]+self.left_image_updown), :, :], (imgLeft.shape[0], imgLeft.shape[1]))
+            # #     resized_imgRight = cv2.resize(imgRight[max(0,self.right_image_updown):min(self.imgSize[0],self.imgSize[0]+self.right_image_updown), :, :], (imgRight.shape[0], imgRight.shape[1]))
 
-                # Crop image in the up/down direction, and re-size back to a 1:1 resolution (why fx is also scaled by the same factor?)
-                resized_imgLeft = cv2.resize(imgLeft[max(0,self.left_image_updown):min(self.imgSize[0],self.imgSize[0]+self.left_image_updown), :, :], (0, 0), \
-                                                fx=self.imgSize[0]/(self.imgSize[0]-np.abs(self.left_image_updown)), fy=self.imgSize[0]/(self.imgSize[0]-np.abs(self.left_image_updown)))
+            #     # Crop image in the up/down direction, and re-size back to a 1:1 resolution (why fx is also scaled by the same factor?)
+            #     resized_imgLeft = cv2.resize(imgLeft[max(0,self.left_image_updown):min(self.imgSize[0],self.imgSize[0]+self.left_image_updown), :, :], (0, 0), \
+            #                                     fx=self.imgSize[0]/(self.imgSize[0]-np.abs(self.left_image_updown)), fy=self.imgSize[0]/(self.imgSize[0]-np.abs(self.left_image_updown)))
 
-                resized_imgRight = cv2.resize(imgRight[max(0,self.right_image_updown):min(self.imgSize[0],self.imgSize[0]+self.right_image_updown), :, :], (0, 0), \
-                                                fx=self.imgSize[0]/(self.imgSize[0]-np.abs(self.right_image_updown)), fy=self.imgSize[0]/(self.imgSize[0]-np.abs(self.right_image_updown)))
+            #     resized_imgRight = cv2.resize(imgRight[max(0,self.right_image_updown):min(self.imgSize[0],self.imgSize[0]+self.right_image_updown), :, :], (0, 0), \
+            #                                     fx=self.imgSize[0]/(self.imgSize[0]-np.abs(self.right_image_updown)), fy=self.imgSize[0]/(self.imgSize[0]-np.abs(self.right_image_updown)))
 
-                # Get the stereo image frames truncated from the resized images 
-                # self.imgSize is the original single frame image from redis
-                resized_imgLeft = resized_imgLeft[:,int((np.abs(resized_imgLeft.shape[1]-self.imgSize[1]))/2):int((self.imgSize[1]+np.abs(resized_imgLeft.shape[1]-self.imgSize[1])/2)),:]
+            #     # Get the stereo image frames truncated from the resized images 
+            #     # self.imgSize is the original single frame image from redis
+            #     resized_imgLeft = resized_imgLeft[:,int((np.abs(resized_imgLeft.shape[1]-self.imgSize[1]))/2):int((self.imgSize[1]+np.abs(resized_imgLeft.shape[1]-self.imgSize[1])/2)),:]
 
-                resized_imgRight = resized_imgRight[:,int((np.abs(resized_imgRight.shape[1]-self.imgSize[1]))/2):int((self.imgSize[1]+np.abs(resized_imgRight.shape[1]-self.imgSize[1])/2)):,:]
+            #     resized_imgRight = resized_imgRight[:,int((np.abs(resized_imgRight.shape[1]-self.imgSize[1]))/2):int((self.imgSize[1]+np.abs(resized_imgRight.shape[1]-self.imgSize[1])/2)):,:]
 
-                # Concatenate the left and right images horizontally to form the stereo image with horizontal overlap. Problem if the self.overlap cuts off too much  
-                stackedImg = np.hstack((resized_imgLeft[:, :-(self.overlap + 1), :], resized_imgRight[:, self.overlap:, :]))
-                # stackedImg = np.hstack((imgLeft[:, :-(self.overlap + 1), :], imgRight[:, self.overlap:, :]))
+            #     # Concatenate the left and right images horizontally to form the stereo image with horizontal overlap. Problem if the self.overlap cuts off too much  
+            #     stackedImg = np.hstack((resized_imgLeft[:, :-(self.overlap + 1), :], resized_imgRight[:, self.overlap:, :]))
+            #     # stackedImg = np.hstack((imgLeft[:, :-(self.overlap + 1), :], imgRight[:, self.overlap:, :]))
 
-                # New method to not produce black bars
-                # Get the indices from the 
+                ### Windowing Method ###              
+                sampled_imgLeft = imgLeft[max(0, self.left_coord[0]) : min(self.left_coord[0] + self.height, self.imgSize[0]), \   
+                                        max(0, self.left_coord[1]) : min(self.left_coord[1] + self.width, self.imgSize[1]), :]
+                
+                sampled_imgRight = imgRight[max(0, self.right_coord[0]) : min(self.right_coord[0] + self.height, self.imgSize[0]), \
+                                        max(0, self.right_coord[1] - self.width) : min(self.right_coord[1], self.imgSize[1]), :]
+
+                stackedImg = np.hstack((sampled_imgLeft, sampled_imgRight))
 
             else:
                 stackedImg = imgLeft

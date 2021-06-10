@@ -37,7 +37,6 @@
 #include <sstream>
 #include <fstream>
 
-
 #include "cRedis.h"
 #include "PoorMansHelper.h"
 
@@ -208,7 +207,7 @@ int AcquireImages(CameraList camList)
     // int r_img_cnt = 0; 
     // int l_img_cnt = 0; 
     m_redis->setRedis(capture_key, 0);  // set to default value 
-    m_redis->setRedis(reset_capture_key, 0);  // set to default value 
+    // m_redis->setRedis(reset_capture_key, 0);  // set to default value 
 
     cout << endl << "*** IMAGE ACQUISITION ***" << endl << endl;
 
