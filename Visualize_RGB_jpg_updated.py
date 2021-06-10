@@ -208,7 +208,8 @@ class GUI(object):
             # Initialize the right image, top-right coordinate
             self.sample_height = int(self.height_factor * self.imgSize[0])
             self.sample_width = int(self.width_factor * self.imgSize[1])  
-            self.right_coord[1] = self.imgSize[1] - self.sample_width - 1  # top left corner of right image 
+            if ctr == 0:  # initialize only at the start 
+                self.right_coord[1] = self.imgSize[1] - self.sample_width - 1  # top left corner of right image 
 
             if self.stereo:
             # #     resized_imgLeft = cv2.resize(imgLeft[max(0,self.left_image_updown):min(self.imgSize[0],self.imgSize[0]+self.left_image_updown), :, :], (imgLeft.shape[0], imgLeft.shape[1]))
