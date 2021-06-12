@@ -560,9 +560,9 @@ int AcquireImages(CameraList camList)
       			// save image if requested 
                 if (m_redis->getRedisDouble(capture_key) == 1) 
 	            {
-            		save_dir = dir + "Right/" + std::to_string(img_cnt) + "_right" + ".png";
+            		save_dir = dir + "Right/" + std::to_string(img_cnt) + "_right" + ".tiff";
             		right_image->Save(save_dir.c_str());
-            		save_dir = dir + "Left/" + std::to_string(img_cnt) + "_left" + ".png";
+            		save_dir = dir + "Left/" + std::to_string(img_cnt) + "_left" + ".tiff";
             		left_image->Save(save_dir.c_str());
             		img_cnt += 1;
 	    		    m_redis->setRedis(capture_key, 0);  // set to default value 
