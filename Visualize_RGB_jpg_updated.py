@@ -24,14 +24,14 @@ class GUI(object):
         # self.left_image_updown = 0
         # self.right_image_updown = 0
         # self.left_image_leftright = 0
-        # self.right_image_leftright = 0 
+        # self.right_image_leftright = 0
         self.left_coord = [0, 0]  # current top left edge (row, col)
         self.right_coord = [0, 0]  # current top left edge (row, col)
 
         # sub-sample image parameters
         self.sample_height = 0
         self.sample_width = 0
-        self.height_factor = 0.75 
+        self.height_factor = 0.75
         self.width_factor = 0.75
         self.pixel_step = 5;
 
@@ -84,7 +84,7 @@ class GUI(object):
     def moveRightDown(self):
         # self.right_image_updown -= 10
         # self.right_image_updown = max(-self.imgSize[0], self.right_image_updown)
-        self.right_coord[0] += self.pixel_step 
+        self.right_coord[0] += self.pixel_step
 
     def setOverlap(self, value):
         self.overlap = min(self.imgSize[1], max(0, value))
@@ -113,7 +113,7 @@ class GUI(object):
         offsets_log_file.close()
 
     def toggleCrosshairs(self):
-        self.drawCross = not self.drawCross 
+        self.drawCross = not self.drawCross
 
     def toggleFullscreen(self):
         self.fullscreen = not self.fullscreen
@@ -213,13 +213,13 @@ class GUI(object):
 
             # Initialize the right image, top-right coordinate
             self.sample_height = int(self.height_factor * self.imgSize[0])
-            self.sample_width = int(self.width_factor * self.imgSize[1])  
-            if ctr == 1:  # initialize only at the start 
+            self.sample_width = int(self.width_factor * self.imgSize[1])
+            if ctr == 1:  # initialize only at the start
                 self.right_coord[0] = int(self.imgSize[0]/2 - self.sample_height/2)
-                # self.right_coord[1] = self.imgSize[1] - self.sample_width - 1  # top left corner of right image 
+                # self.right_coord[1] = self.imgSize[1] - self.sample_width - 1  # top left corner of right image
                 self.right_coord[1] = int(self.imgSize[1]/2 - self.sample_width/2)
                 self.left_coord[0] = int(self.imgSize[0]/2 - self.sample_height/2)
-                # self.left_coord[1] = self.imgSize[1] - self.sample_width - 1  # top left corner of right image 
+                # self.left_coord[1] = self.imgSize[1] - self.sample_width - 1  # top left corner of right image
                 self.left_coord[1] = int(self.imgSize[1]/2 - self.sample_width/2)
 
             if self.stereo:
@@ -233,20 +233,20 @@ class GUI(object):
             #     resized_imgRight = cv2.resize(imgRight[max(0,self.right_image_updown):min(self.imgSize[0],self.imgSize[0]+self.right_image_updown), :, :], (0, 0), \
             #                                     fx=self.imgSize[0]/(self.imgSize[0]-np.abs(self.right_image_updown)), fy=self.imgSize[0]/(self.imgSize[0]-np.abs(self.right_image_updown)))
 
-            #     # Get the stereo image frames truncated from the resized images 
+            #     # Get the stereo image frames truncated from the resized images
             #     # self.imgSize is the original single frame image from redis
             #     resized_imgLeft = resized_imgLeft[:,int((np.abs(resized_imgLeft.shape[1]-self.imgSize[1]))/2):int((self.imgSize[1]+np.abs(resized_imgLeft.shape[1]-self.imgSize[1])/2)),:]
 
             #     resized_imgRight = resized_imgRight[:,int((np.abs(resized_imgRight.shape[1]-self.imgSize[1]))/2):int((self.imgSize[1]+np.abs(resized_imgRight.shape[1]-self.imgSize[1])/2)):,:]
 
-            #     # Concatenate the left and right images horizontally to form the stereo image with horizontal overlap. Problem if the self.overlap cuts off too much  
+            #     # Concatenate the left and right images horizontally to form the stereo image with horizontal overlap. Problem if the self.overlap cuts off too much
             #     stackedImg = np.hstack((resized_imgLeft[:, :-(self.overlap + 1), :], resized_imgRight[:, self.overlap:, :]))
             #     # stackedImg = np.hstack((imgLeft[:, :-(self.overlap + 1), :], imgRight[:, self.overlap:, :]))
 
-                ### Windowing Method ###              
+                ### Windowing Method ###
                 sampled_imgLeft = imgLeft[max(0, self.left_coord[0]) : min(self.left_coord[0] + self.sample_height, self.imgSize[0] - 1), \
                                         max(0, self.left_coord[1]) : min(self.left_coord[1] + self.sample_width, self.imgSize[1] - 1), :]
-                
+
                 sampled_imgRight = imgRight[max(0, self.right_coord[0]) : min(self.right_coord[0] + self.sample_height, self.imgSize[0] - 1), \
                                         max(0, self.right_coord[1]) : min(self.right_coord[1] + self.sample_width, self.imgSize[1] - 1), :]
 
@@ -266,7 +266,7 @@ class GUI(object):
 
             displayImg = np.zeros((self.screenHeight, self.screenWidth, self.imgSize[2]), np.uint8)
 
-            # Re-size to recover the displayImg resolution 
+            # Re-size to recover the displayImg resolution
             if float(self.screenHeight)/self.screenWidth > float(stackedImg.shape[0])/stackedImg.shape[1]:
                 stackedImg = cv2.resize(stackedImg, (0, 0), fx=self.screenWidth/float(stackedImg.shape[1]), fy=self.screenWidth/float(stackedImg.shape[1]))
                 offset = int((self.screenHeight - stackedImg.shape[0])/2)
