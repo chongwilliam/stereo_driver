@@ -6,13 +6,13 @@ set(CMAKE_CXX_FLAGS "-std=c++11")
 find_package(OpenCV REQUIRED)
 
 include_directories(
-    /usr/include/ueye_api/
-    /usr/include/hiredis/
-    /usr/include/eigen3/
+    #/usr/include/ueye_api/
+    /usr/local/include/hiredis/
+    /usr/local/include/eigen3/
 )
 
 link_directories(
-    /usr/lib/
+    /usr/local/lib/
     #/usr/lib/x86_64-linux-gnu/
     #        /usr/local/lib
 )
@@ -25,7 +25,8 @@ set(sources
     cRedis.cpp
 )
 
-add_definitions(-DUEYE_API)
+# add_definitions(-DSpinnaker)
+# add_definitions(-DUEYE_API)
 
 #include_directories(
 #/usr/include/flycapture/
