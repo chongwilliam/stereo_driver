@@ -12,6 +12,9 @@ import tkinter as tk
 import redis
 import threading
 import time
+import os
+from pathlib import Path
+import shutil
 
 
 class GUI(object):
@@ -29,11 +32,11 @@ class GUI(object):
         self.right_coord = [0, 0]  # current top left edge (row, col)
 
         # sub-sample image parameters
-        self.sample_height = 0
-        self.sample_width = 0
-        self.height_factor = 0.75 
-        self.width_factor = 0.75
-        self.pixel_step = 5;
+        self.sample_height = 0  # temp init, don't change
+        self.height_factor = 1.0
+        self.sample_width = 0  # temp init, don't change 
+        self.width_factor = 0.8
+        self.pixel_step = 2
 
         hostIP = '192.168.1.103'
         # hostIP = 'localhost'
@@ -54,9 +57,18 @@ class GUI(object):
         self.screenWidth = self.root.winfo_screenwidth()
         self.screenHeight = self.root.winfo_screenheight()
 
+        # threaded save flags
+        self.img_params = [int(cv2.IMWRITE_JPEG_QUALITY), 95] # range from (0 to 100, default at 95)        
+        self.img_available = 0  # 0 if false, 1 if true
+        self.write_done = 1  # 0 if false, 1 if true
+        self.img_to_write = None  # copy of image to be displayed if writing is done 
+        self.compressed_img_to_write = None  # compressed image 
+        self.f_cnt = 0  # file number to start 
+        self.img_count = 0  # counter to only save every nth frame 
+
     def increaseOverlap(self):
         # self.overlap += 10
-        # self.overlap = min(self.imgSize[1], self.overlap)
+        # self.overlap = min(self.imgSize[1], self.overlap) 
         self.left_coord[1] -= self.pixel_step
         self.right_coord[1] += self.pixel_step
 
@@ -308,11 +320,15 @@ class GUI(object):
             start_time_show = time.time()
             cv2.imshow("GUI", displayImg) # 0.06 sec
 
-
             if self.fullscreen:
                 cv2.setWindowProperty("GUI", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
             else:
                 cv2.setWindowProperty("GUI", cv2.WINDOW_NORMAL, cv2.WINDOW_NORMAL)
+
+            # trigger imwrite thread if displayImg is available (non-blocking)
+            self.img_available = 1  # just to protect the first loop   
+            if self.write_done == 1:
+                self.img_to_write = displayImg                             
 
             key = cv2.waitKey(1)
             if key == 63234 or (key & 0xFF == ord('a')): # left arrow or 'a'
@@ -357,11 +373,42 @@ class GUI(object):
         cv2.destroyAllWindows()
         cv2.waitKey(1)
 
+    def save_jpg(self):
+        while(True):
+            if self.img_available == 1:            
+                self.write_done = 0            
+                self.f_name = '/home/vision/py-flask-video-stream/images/o1k_prev_2x1.jpg'
+                # self.compressed_img_to_write = cv2.imencode('.jpg', self.img_to_write, self.img_params)            
+                cv2.imwrite(self.f_name, self.img_to_write, self.img_params)  
+                # self.f_cnt += 1
+                # if self.f_cnt > 0:  # save buffer of size N 
+                    # self.f_cnt = 0
+                src_path = '/home/vision/py-flask-video-stream/images/o1k_prev_2x1.jpg'
+                trg_path = '/home/vision/py-flask-video-stream/images/o1k_2x1.jpg'
+                os.rename(src_path, trg_path)
+                # shutil.copy(self.f_name, trg_path)
+                # for src_file in Path(src_path).glob('*.*'):
+                #     shutil.copy(src_file, trg_path)
+                self.write_done = 1
+                print("Saved Picture (Ctrl-C again to quit thread)")
+                time.sleep(1/20)  # sleep for fps duration to avoid saving the same image repeatedly
 
 def main():
     root = tk.Tk()
     app = GUI(root)
+    # start thread for saving jpg to file 
+    print("Started save thread")
+    # dir = '/home/vision/py-flask-video-stream/images/'
+    # for f in os.listdir(dir):
+        # os.remove(os.path.join(dir, f))
+    # dir = '/home/vision/py-flask-video-stream/images_to_write/'
+    # for f in os.listdir(dir):
+        # os.remove(os.path.join(dir, f))
+    save_thread = threading.Thread(target=app.save_jpg)
+    save_thread.start()
+    print("Started video loop")
     app.videoLoop()
+
 
 if __name__ == '__main__':
     main()
