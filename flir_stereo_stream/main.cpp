@@ -1,8 +1,4 @@
-
 // Camera sn..22 has failed.
-
-
-
 //=============================================================================
 // Copyright (c) 2001-2018 FLIR Systems, Inc. All Rights Reserved.
 //
@@ -19,7 +15,6 @@
 // SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
 // THIS SOFTWARE OR ITS DERIVATIVES.
 //=============================================================================
-
 /**
  *  @example AcquisitionMultipleCamera.cpp
  *
@@ -66,7 +61,7 @@ void writeJpgToRedisStereo(cv::Mat& a_cv_img_L, const std::string& a_key_L, cv::
 int ConvertToCVmat(ImagePtr pImage);
 // Added
 void recordJpgRedis(const std::string& dir);
-const std::string capture_key = "stereo::capture::trigger";  // 1 for capture, 0 default 
+const std::string capture_key = "stereo::capture::trigger";  // 1 for capture, 0 default
 const std::string reset_capture_key = "stereo::capture::reset";  // 1 to reset (make new directory), 0 default
 ImagePtr right_image;
 ImagePtr left_image;
@@ -204,10 +199,10 @@ int AcquireImages(CameraList camList)
     std::string dir = "/home/radiator2/stereo_images_recording/";
     std::string save_dir;
     int img_cnt = 0;
-    // int r_img_cnt = 0; 
-    // int l_img_cnt = 0; 
-    m_redis->setRedis(capture_key, 0);  // set to default value 
-    // m_redis->setRedis(reset_capture_key, 0);  // set to default value 
+    // int r_img_cnt = 0;
+    // int l_img_cnt = 0;
+    m_redis->setRedis(capture_key, 0);  // set to default value
+    // m_redis->setRedis(reset_capture_key, 0);  // set to default value
 
     cout << endl << "*** IMAGE ACQUISITION ***" << endl << endl;
 
@@ -469,8 +464,8 @@ int AcquireImages(CameraList camList)
                           m_cv_img_left = cv_img.clone();
                           // std::cout << "store left" << std::endl;
                           left_image = pResultImage;
-                //       		// save image if requested 
-	               //          if (m_redis->getRedisDouble(capture_key) == 1) 
+                //       		// save image if requested
+	               //          if (m_redis->getRedisDouble(capture_key) == 1)
 				            // {
 			            	// 	save_dir = dir + "Left/" + std::to_string(r_img_cnt) + ".png";
 			            	// 	pResultImage->Save(save_dir.c_str());
@@ -489,8 +484,8 @@ int AcquireImages(CameraList camList)
                           m_cv_img_right = cv_img.clone();
                           // std::cout << "store right" << std::endl;
                           right_image = pResultImage;
-                    		// save image if requested 
-	               //          if (m_redis->getRedisDouble(capture_key) == 1) 
+                    		// save image if requested
+	               //          if (m_redis->getRedisDouble(capture_key) == 1)
 				            // {
 			            	// 	save_dir = dir + "Right/" + std::to_string(l_img_cnt) + ".png";
 			            	// 	pResultImage->Save(save_dir.c_str());
@@ -557,30 +552,30 @@ int AcquireImages(CameraList camList)
               // m_mutex.unlock();
               // std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Makes app run longer but still crashes.
 
-      			// save image if requested 
-                if (m_redis->getRedisDouble(capture_key) == 1) 
+      			// save image if requested
+                if (m_redis->getRedisDouble(capture_key) == 1)
 	            {
             		save_dir = dir + "Right/" + std::to_string(img_cnt) + "_right" + ".tiff";
             		right_image->Save(save_dir.c_str());
             		save_dir = dir + "Left/" + std::to_string(img_cnt) + "_left" + ".tiff";
             		left_image->Save(save_dir.c_str());
             		img_cnt += 1;
-	    		    m_redis->setRedis(capture_key, 0);  // set to default value 
+	    		    m_redis->setRedis(capture_key, 0);  // set to default value
             	}
 
             // // Query redis key to reset stereo image capture
-            // if (m_redis->getRedisDouble(reset_capture_key) == 1) 
+            // if (m_redis->getRedisDouble(reset_capture_key) == 1)
             // {
             //     _tm = time(NULL);
             //     curtime = localtime(&_tm);
             //     rec_date_time = asctime(curtime);
             //     dir = "~/stereo_images_recording/" + rec_date_time;
-            //     img_cnt = 0; 
+            //     img_cnt = 0;
             //     m_redis->setRedis(reset_capture_key, 0);
             // }
 
-            // // Query redis key for stereo image capture 
-            // if (m_redis->getRedisDouble(capture_key) == 1) 
+            // // Query redis key for stereo image capture
+            // if (m_redis->getRedisDouble(capture_key) == 1)
             // {
             //     recordJpgRedis(dir, img_cnt, m_cv_img_left, m_cv_img_right);
             //     img_cnt += 1;
@@ -590,7 +585,6 @@ int AcquireImages(CameraList camList)
               // -----------------------------------------------------
               // WRITE TWO SEPARATE IMAGES TO REDIS USING PIPELINING
               // -----------------------------------------------------
-
               writeJpgToRedisStereo(m_cv_img_left,  "ptgrey_left", m_cv_img_right, "ptgrey_right");
 #endif
 
@@ -849,36 +843,7 @@ int main(int /*argc*/, char** /*argv*/)
 void writeJpgToRedis(cv::Mat& a_cv_img, const std::string& a_key)
 {
     vector<int> params;
-    params.push_back(CV_IMWRITE_JPEG_QUALITY);  // applies compression factor
-    params.push_back(50);
-
-
-    // std::chrono::high_resolution_clock::time_point start = PoorMansHelper::startTimer();
-    vector<uchar> buff;
-    cv::imencode(".jpg", a_cv_img, buff, params); // 4978 microseconds
-    // PoorMansHelper::endTimer(start, "imencode jpg");
-
-
-    // start = PoorMansHelper::startTimer();
-    m_redis->setJpegBinary(a_key, buff); // 170 microseconds
-    // PoorMansHelper::endTimer(start, "setJpegBinary to redis");
-}
-
-void writePngToRedis(cv::Mat& a_cv_img)
-{
-    vector<int> params;
-    params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-    params.push_back(100);
-
-
-    // std::chrono::high_resolution_clock::time_point start = PoorMansHelper::startTimer();
-    vector<uchar> buff;
-    cv::imencode(".png", a_cv_img, buff, params); //81262 microseconds
-    // PoorMansHelper::endTimer(start, "imencode png");
-
-
-    // start = PoorMansHelper::startTimer();
-    m_redis->setJpegBinary("pt_grey_png", buff); //  microseconds
+	@@ -882,25 +138,6 @@ void writePngToRedis(cv::Mat& a_cv_img)
     // PoorMansHelper::endTimer(start, "setJpegBinary to redis PNG");
 }
 
@@ -905,27 +870,23 @@ int ConvertToCVmat(ImagePtr pImage)
 {
 	int result = 0;
 	ImagePtr convertedImage = pImage->Convert(PixelFormat_BGR8, NEAREST_NEIGHBOR);
-
 	unsigned int XPadding = convertedImage->GetXPadding();
 	unsigned int YPadding = convertedImage->GetYPadding();
 	unsigned int rowsize = convertedImage->GetWidth();
 	unsigned int colsize = convertedImage->GetHeight();
-
 	//image data contains padding. When allocating Mat container size, you need to account for the X,Y image data padding.
 	Mat cvimg = cv::Mat(colsize + YPadding, rowsize + XPadding, CV_8UC3, convertedImage->GetData(), convertedImage->GetStride());
 	namedWindow("current Image", CV_WINDOW_AUTOSIZE);
 	imshow("current Image", cvimg);
 	resizeWindow("current Image", rowsize / 2, colsize / 2);
 	waitKey(1);//otherwise the image will not display...
-
 	return result;
 }
-
 // Records uncompressed L and R images in dir with timestamps
-void recordJpgRedis(std::string& dir, int& count, cv::Mat& a_cv_img_L, cv::Mat& a_cv_img_R) 
+void recordJpgRedis(std::string& dir, int& count, cv::Mat& a_cv_img_L, cv::Mat& a_cv_img_R)
 {
     std::string l_name = dir + "Left/" + std::to_string(count) + ".jpg";
-    std::string r_name = dir + "Right/" + std::to_string(count) + ".jpg";  
+    std::string r_name = dir + "Right/" + std::to_string(count) + ".jpg";
     cv::imwrite(l_name, a_cv_img_L);
     cv::imwrite(r_name, a_cv_img_R);
 }
