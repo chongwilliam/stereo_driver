@@ -36,7 +36,7 @@ class GUI(object):
         self.sample_height = 0  # temp init, don't change
         self.height_factor = 1.0
         self.sample_width = 0  # temp init, don't change 
-        self.width_factor = 0.99
+        self.width_factor = 0.9
         self.pixel_step = 2
 
         hostIP = '192.168.1.103'
@@ -264,6 +264,15 @@ class GUI(object):
             #     stackedImg = np.hstack((resized_imgLeft[:, :-(self.overlap + 1), :], resized_imgRight[:, self.overlap:, :]))
             #     # stackedImg = np.hstack((imgLeft[:, :-(self.overlap + 1), :], imgRight[:, self.overlap:, :]))
 
+                # Apply calibration if requested
+                if self.cal_opt == 1:
+                    # Undistort
+                    # sampled_imgLeft = cv2.undistort(sampled_imgLeft, self.M1, self.d1, None, self.newCamMtx1)
+                    # sampled_imgRight = cv2.undistort(sampled_imgRight, self.M2, self.d2, None, self.newCamMtx2)
+                    # Remap
+                    imgLeft = cv2.remap(imgLeft, self.leftMapX, self.leftMapY, cv2.INTER_LINEAR)
+                    imgRight = cv2.remap(imgRight, self.rightMapX, self.rightMapY, cv2.INTER_LINEAR)
+
                 ### Windowing Method ###
                 sampled_imgLeft = imgLeft[max(0, self.left_coord[0]) : min(self.left_coord[0] + self.sample_height, self.imgSize[0] - 1), \
                                         max(0, self.left_coord[1]) : min(self.left_coord[1] + self.sample_width, self.imgSize[1] - 1), :]
@@ -278,15 +287,6 @@ class GUI(object):
 
                 sampled_imgLeft = cv2.resize(sampled_imgLeft, (self.imgSize[1], self.imgSize[0]))
                 sampled_imgRight = cv2.resize(sampled_imgRight, (self.imgSize[1], self.imgSize[0]))
-
-                # Apply calibration if requested
-                if self.cal_opt == 1:
-                    # Undistort
-                    sampled_imgLeft = cv2.undistort(sampled_imgLeft, self.M1, self.d1, None, self.newCamMtx1)
-                    sampled_imgRight = cv2.undistort(sampled_imgRight, self.M2, self.d2, None, self.newCamMtx2)
-                    # Remap
-                    sampled_imgLeft = cv2.remap(sampled_imgLeft, self.leftMapX, self.leftMapY, cv2.INTER_LINEAR)
-                    sampled_imgRight = cv2.remap(sampled_imgRight, self.rightMapX, self.rightMapY, cv2.INTER_LINEAR)
 
                 stackedImg = np.hstack((sampled_imgLeft, sampled_imgRight))
 
@@ -411,7 +411,7 @@ def main():
     # Options
     parser = argparse.ArgumentParser()
     parser.add_argument('--save', help='Save Option (0 or 1)', default=0, type=int)  # default no saving 
-    parser.add_argument('--cal', help='Apply Calibration (0, or 1)', default=0, type=int)  # default no calibration
+    parser.add_argument('--cal', help='Apply Calibration (0 or 1)', default=1, type=int)  # default yes calibration
     args = parser.parse_args()
 
     # Create object
