@@ -1,0 +1,49 @@
+%YAML:1.0
+---
+# Array name:
+name: "OceanOneStereoHead"
+# Image width in pixels
+image_width:1288
+# Image height in pixels
+image_height:964
+# Number of camera rows (array height)
+array_height: 1
+# Number of camera columns (array width)
+array_width: 2
+# Total of active cameras
+num_camera_used: 2
+# Reference camera index in y direction  (from Top/Left)
+ref_camera_id_row: 0
+# Reference camera index in x direction (from Top/Left)
+ref_camera_id_col: 1
+# Expected horizontal baseline in mm
+size_baseline_hori_expected: 84.0
+# Expected vertical baseline in mm
+size_baseline_vert_expected: 84.0
+# Camera layout:
+layout:
+   -[1, 1]
+Camera-0-0:
+   label: "OceanOne-left"
+   path: "Left"
+   format: "*.png"
+   image_size_px: [ 1288, 964]
+   optical_center_px: [ 644., 482. ]
+   focal_length_mm: 3.5
+   pixel_size_um: 3.75
+   bayer: NONE
+   reverse_color: 1
+   image_rotation: 0
+Camera-0-1:
+   label: "OceanOne-right"
+   path: "Right"
+   format: "*.png"
+   image_size_px: [ 1288, 964 ]
+   optical_center_px: [ 644., 482. ]
+   focal_length_mm: 3.5
+   pixel_size_um: 3.75
+   bayer: NONE
+   reverse_color: 1
+   image_rotation: 0
+# ...
+# end of file

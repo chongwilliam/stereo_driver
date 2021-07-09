@@ -1,0 +1,45 @@
+%YAML:1.0
+---
+#
+# 2D Array Calibration Ocean One Target small color target
+#
+Calibration 2D:
+   # Use distortion (default: 0)
+   use_distortion: 1
+   # Refine calibration with fixed camera centers (default: 1)
+   use_geometry_refinement: 1
+   # Maximal number of iterations for geometry calibration (default: 2000)
+   iter_MAX_geo_cali: 2000
+   # Refine calibration with fixed centers (default: 1)
+   use_fixed_centers_refinement: 1
+   # Maximal number of iterations for fixed center calibrator (default: 2000)
+   iter_MAX_geo_cali_fix_center: 2000
+   # Use rectification refinement (default: 1)
+   use_rectification_refinement: 1
+   # Maximal number of iterations for rectification (default: 5000)
+   iter_MAX_rectify: 5000
+#
+# Checkerboard Target Detection parameters
+#
+Target Detection:
+   # Checkerboard width
+   target_width: 6
+   # Checkerboard height
+   target_height: 9
+   # Checkerboard square size 
+   target_square_width: 71.0
+   target_square_height: 71.0
+   # Search window for grid detection. Typical value 5-10  mod'd HHB  now 2 from GK Oct recommendation Nov 7
+   search_window: 3
+   # Use fast checkerboard detection (0 is more accurate)
+   use_fast_detection: 0
+   # Use quad filtering for checkerboard detection
+   use_filter_quads: 1
+   # Use adaptive threshold
+   use_adaptive_threshold: 1
+   # normalize image
+   use_normalize_image: 1
+   # split bayer for detection
+   use_bayer_channels: 1
+   
+   

@@ -1,0 +1,139 @@
+%YAML:1.0
+---
+file_format: "0.1"
+name: OceanOneStereoHead
+b_calibration_done: 1
+image_width: 1288
+image_height: 964
+array_height: 1
+array_width: 2
+num_camera_used: 2
+ref_camera_id_row: 0
+ref_camera_id_col: 1
+size_baseline_hori_expected: 84.
+size_baseline_vert_expected: 84.
+layout:
+   - [ 1, 1 ]
+cropping_bounding_box: [ 49, 3, 1244, 956 ]
+K_common: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 9.6712727196328490e+02, 0., 6.7624408793924385e+02, 0.,
+       9.6722489971716982e+02, 4.9947110641694047e+02, 0., 0., 1. ]
+R_common: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 9.9998047176897620e-01, -1.5569130914322438e-03,
+       6.0524459784369053e-03, 1.5569416087156673e-03,
+       9.9999878796567909e-01, 6.3829520010547249e-19,
+       -6.0524386426646544e-03, 9.4233049783322420e-06,
+       9.9998168378109709e-01 ]
+horizontal_baseline: !!opencv-matrix
+   rows: 2
+   cols: 1
+   dt: d
+   data: [ -8.3999999999999986e+01, 0. ]
+vertical_baseline: !!opencv-matrix
+   rows: 1
+   cols: 1
+   dt: d
+   data: [ 0. ]
+Wb_common: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data: [ 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0.,
+       1. ]
+R_ext: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 1., 0., 0., 0., 1., 0., 0., 0., 1. ]
+T_ext: !!opencv-matrix
+   rows: 3
+   cols: 1
+   dt: d
+   data: [ 0., 0., 0. ]
+Camera-0-0:
+   label: OceanOne-left
+   path: Left
+   format: "*.png"
+   image_size_px: [ 1288, 964 ]
+   bayer: NONE
+   reverse_color: 1
+   image_rotation: 0
+   K: !!opencv-matrix
+      rows: 3
+      cols: 3
+      dt: d
+      data: [ 9.6575189306286575e+02, 0., 6.2757834301065293e+02, 0.,
+          9.6629837867396327e+02, 4.9444542075156858e+02, 0., 0., 1. ]
+   kc: !!opencv-matrix
+      rows: 5
+      cols: 1
+      dt: d
+      data: [ -3.4909390343383373e-01, 1.2916240739674947e-01, 0., 0.,
+          0. ]
+   R: !!opencv-matrix
+      rows: 3
+      cols: 3
+      dt: d
+      data: [ 9.9997492014832901e-01, -3.6836054386549695e-03,
+          6.0489772123217501e-03, 3.6706381585761222e-03,
+          9.9999094456005488e-01, 2.1534190019787255e-03,
+          -6.0568547821192786e-03, -2.1311613879736284e-03,
+          9.9997938611817727e-01 ]
+   T: !!opencv-matrix
+      rows: 3
+      cols: 1
+      dt: d
+      data: [ 8.3997893292459636e+01, 3.0833360532039428e-01,
+          -5.0877580169801939e-01 ]
+   H: !!opencv-matrix
+      rows: 3
+      cols: 3
+      dt: d
+      data: [ 1.0025175900393295e+00, 3.6305474989140867e-03,
+          4.6029583960919261e+01, -2.1127109593376383e-03,
+          1.0018767461401921e+00, 3.2756055304466458e+00,
+          -5.1561379255865490e-07, 1.8226745407531052e-06, 1. ]
+Camera-0-1:
+   label: OceanOne-right
+   path: Right
+   format: "*.png"
+   image_size_px: [ 1288, 964 ]
+   bayer: NONE
+   reverse_color: 1
+   image_rotation: 0
+   K: !!opencv-matrix
+      rows: 3
+      cols: 3
+      dt: d
+      data: [ 9.6850265086370405e+02, 0., 6.7624408793924385e+02, 0.,
+          9.6815142076037637e+02, 4.9947110641694047e+02, 0., 0., 1. ]
+   kc: !!opencv-matrix
+      rows: 5
+      cols: 1
+      dt: d
+      data: [ -3.4287218312471396e-01, 1.2124583626075097e-01, 0., 0.,
+          0. ]
+   R: !!opencv-matrix
+      rows: 3
+      cols: 3
+      dt: d
+      data: [ 1., 0., 0., 0., 1., 0., 0., 0., 1. ]
+   T: !!opencv-matrix
+      rows: 3
+      cols: 1
+      dt: d
+      data: [ 0., 0., 0. ]
+   H: !!opencv-matrix
+      rows: 3
+      cols: 3
+      dt: d
+      data: [ 9.9017280149252751e-01, -1.5422023868493049e-03,
+          1.0402261170292018e+01, -1.5598883916613222e-03,
+          9.9486537356678939e-01, 1.5199328038778854e+00,
+          -6.2231193336547949e-06, 9.6925602031733245e-09, 1. ]

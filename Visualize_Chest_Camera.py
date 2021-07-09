@@ -3,7 +3,7 @@ import redis
 import numpy as np
 
 if __name__ == '__main__':
-	hostIP = '192.168.1.91'
+	hostIP = '192.168.1.92'
 	hostPort = 6379
 	r = redis.StrictRedis(host=hostIP, port=hostPort, db=0)
 
