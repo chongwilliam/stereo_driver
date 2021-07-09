@@ -15,6 +15,7 @@ import time
 import os
 from pathlib import Path
 import shutil
+import argparse
 
 
 class GUI(object):
@@ -35,7 +36,7 @@ class GUI(object):
         self.sample_height = 0  # temp init, don't change
         self.height_factor = 1.0
         self.sample_width = 0  # temp init, don't change 
-        self.width_factor = 0.8
+        self.width_factor = 0.9
         self.pixel_step = 2
 
         hostIP = '192.168.1.103'
@@ -65,6 +66,20 @@ class GUI(object):
         self.compressed_img_to_write = None  # compressed image 
         self.f_cnt = 0  # file number to start 
         self.img_count = 0  # counter to only save every nth frame 
+        self.f_name = '/home/vision/py-flask-video-stream/images/o1k_prev_2x1.jpg' 
+
+        # Calibration parameters
+        self.cal_opt = 0
+        self.M1 = None
+        self.M2 = None
+        self.d1 = None
+        self.d2 = None
+        self.newCamMtx1 = None
+        self.newCamMtx2 = None
+        self.leftMapX = None
+        self.leftMapY = None
+        self.rightMapX = None
+        self.rightMapY = None
 
     def increaseOverlap(self):
         # self.overlap += 10
@@ -136,12 +151,8 @@ class GUI(object):
     def setMonoView(self):
         self.stereo = False
 
-
     def videoLoop(self):
         cv2.namedWindow("GUI", cv2.WINDOW_NORMAL)
-
-
-
 
         # ----------------------------
         # Load Camera Calibration
@@ -161,8 +172,6 @@ class GUI(object):
         #         mtx, dist, _, _ = [X[i] for i in ('mtx','dist','rvecs','tvecs')]
         #         # print ('mtx = \n', mtx)
         #
-
-
 
         # cv2.createTrackbar('Overlap', "GUI", 0, self.imgSize[1], self.setOverlap)
 
@@ -255,6 +264,15 @@ class GUI(object):
             #     stackedImg = np.hstack((resized_imgLeft[:, :-(self.overlap + 1), :], resized_imgRight[:, self.overlap:, :]))
             #     # stackedImg = np.hstack((imgLeft[:, :-(self.overlap + 1), :], imgRight[:, self.overlap:, :]))
 
+                # Apply calibration if requested
+                if self.cal_opt == 1:
+                    # Undistort
+                    # sampled_imgLeft = cv2.undistort(sampled_imgLeft, self.M1, self.d1, None, self.newCamMtx1)
+                    # sampled_imgRight = cv2.undistort(sampled_imgRight, self.M2, self.d2, None, self.newCamMtx2)
+                    # Remap
+                    imgLeft = cv2.remap(imgLeft, self.leftMapX, self.leftMapY, cv2.INTER_LINEAR)
+                    imgRight = cv2.remap(imgRight, self.rightMapX, self.rightMapY, cv2.INTER_LINEAR)
+
                 ### Windowing Method ###
                 sampled_imgLeft = imgLeft[max(0, self.left_coord[0]) : min(self.left_coord[0] + self.sample_height, self.imgSize[0] - 1), \
                                         max(0, self.left_coord[1]) : min(self.left_coord[1] + self.sample_width, self.imgSize[1] - 1), :]
@@ -262,7 +280,7 @@ class GUI(object):
                 sampled_imgRight = imgRight[max(0, self.right_coord[0]) : min(self.right_coord[0] + self.sample_height, self.imgSize[0] - 1), \
                                         max(0, self.right_coord[1]) : min(self.right_coord[1] + self.sample_width, self.imgSize[1] - 1), :]
 
-                #crosshairs
+                # crosshairs
                 if(self.drawCross == True):
                     cv2.drawMarker(sampled_imgLeft, (int(sampled_imgLeft.shape[1]/2), int(sampled_imgLeft.shape[0]/2)),  (0, 0, 255), cv2.MARKER_CROSS, 100, 2);
                     cv2.drawMarker(sampled_imgRight, (int(sampled_imgRight.shape[1]/2), int(sampled_imgRight.shape[0]/2)),  (0, 0, 255), cv2.MARKER_CROSS, 100, 2);
@@ -314,7 +332,6 @@ class GUI(object):
             # # Rotate Image
             # # -------------------------------
             # displayImg = np.rot90(displayImg)
-
 
             # print (displayImg.shape)
             start_time_show = time.time()
@@ -374,41 +391,58 @@ class GUI(object):
         cv2.waitKey(1)
 
     def save_jpg(self):
+        sf = 1.5  # scale factor of resize
+        src_path = '/home/vision/py-flask-video-stream/images/o1k_prev_2x1.jpg'
+        trg_path = '/home/vision/py-flask-video-stream/images/o1k_2x1.jpg'
         while(True):
             if self.img_available == 1:            
-                self.write_done = 0            
-                self.f_name = '/home/vision/py-flask-video-stream/images/o1k_prev_2x1.jpg'
-                # self.compressed_img_to_write = cv2.imencode('.jpg', self.img_to_write, self.img_params)            
+                self.write_done = 0                            
+                width = int(self.img_to_write[1] * sf)
+                height = int(self.img_to_write[0] * sf)        
+                dim = (width, height)
+                # cv2.imwrite(self.f_name, cv2.resize(self.img_to_write, dim, interpolation=cv2.INTER_AREA), self.img_params)  
                 cv2.imwrite(self.f_name, self.img_to_write, self.img_params)  
-                # self.f_cnt += 1
-                # if self.f_cnt > 0:  # save buffer of size N 
-                    # self.f_cnt = 0
-                src_path = '/home/vision/py-flask-video-stream/images/o1k_prev_2x1.jpg'
-                trg_path = '/home/vision/py-flask-video-stream/images/o1k_2x1.jpg'
                 os.rename(src_path, trg_path)
-                # shutil.copy(self.f_name, trg_path)
-                # for src_file in Path(src_path).glob('*.*'):
-                #     shutil.copy(src_file, trg_path)
                 self.write_done = 1
                 print("Saved Picture (Ctrl-C again to quit thread)")
                 time.sleep(1/20)  # sleep for fps duration to avoid saving the same image repeatedly
 
 def main():
+    # Options
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--save', help='Save Option (0 or 1)', default=0, type=int)  # default no saving 
+    parser.add_argument('--cal', help='Apply Calibration (0 or 1)', default=1, type=int)  # default yes calibration
+    args = parser.parse_args()
+
+    # Create object
     root = tk.Tk()
     app = GUI(root)
-    # start thread for saving jpg to file 
-    print("Started save thread")
-    # dir = '/home/vision/py-flask-video-stream/images/'
-    # for f in os.listdir(dir):
-        # os.remove(os.path.join(dir, f))
-    # dir = '/home/vision/py-flask-video-stream/images_to_write/'
-    # for f in os.listdir(dir):
-        # os.remove(os.path.join(dir, f))
-    save_thread = threading.Thread(target=app.save_jpg)
-    save_thread.start()
+
+    # Load calibration files    
+    app.cal_opt = args.cal
+    if args.cal == 1:
+        print("Calibration will be applied")
+        with open('calibration.npy', 'rb') as f:
+            app.M1 = np.load(f)
+            app.M2 = np.load(f)
+            app.d1 = np.load(f)
+            app.d2 = np.load(f)
+            app.newCamMtx1 = np.load(f)
+            app.newCamMtx2 = np.load(f)
+            app.leftMapX = np.load(f)
+            app.leftMapY = np.load(f)
+            app.rightMapX = np.load(f)
+            app.rightMapY = np.load(f)
+
+    # Save thread
+    if args.save == 1:
+        print("Started save thread")
+        save_thread = threading.Thread(target=app.save_jpg)
+        save_thread.start()
+
+    # Start loop
     print("Started video loop")
     app.videoLoop()
-
 
 if __name__ == '__main__':
     main()
